@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Speech-to-Text</title>
+  </head>
+  <body>
+    <br><br><br>
+    <h1>Speech-to-Text</h1>
+    <form action="/stt" method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" accept="audio/*" required>
+      <button type="submit">Upload</button>
+    </form>
+  <br><br><br><br><br>
+ 
+  
+<button type="submit" onclick="recordAudio()">Start</button>
+<br><br>
+<p>20 sekund ichida audioni yuboring</p>
+<!-- <button type="submit" onclick="stopRecording()">Stop</button> -->
+<script>
+
+// Audio yozib olish funktsiyasi
+function recordAudio() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+            // MediaRecorder obyekti yaratish
+            const mediaRecorder = new MediaRecorder(stream);
+            const audioChunks = [];
+
+            // Ma'lumotlarni to'plash
+            mediaRecorder.addEventListener('dataavailable', function(event) {
+                audioChunks.push(event.data);
+            });
+
+            // Fayl yozib olish
+            mediaRecorder.addEventListener('stop', function() {
+                const audioBlob = new Blob(audioChunks);
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+
+                fetch('/result', { method: 'POST', body: formData })
+                    .then(function(response) {
+                        console.log('Audiodan maydon yozib olindi!');
+                    });
+            });
+
+            // Audioning yozishni boshlash
+            mediaRecorder.start();
+
+            
+
+            // Audioning yozishni tugatish
+            setTimeout(function() {
+                mediaRecorder.stop();
+            }, 20000); // 20 sekunddan keyin yozishni tugatadi
+        })
+        .catch(function(error) {
+            console.error('Mikrofonga kirishda xatolik:', error);
+        });
+}
+// Defines a function for stopping the recording
+function stopRecording() {
+                // Stops the recording if the MediaRecorder object exists
+                if (mediaRecorder) {
+                    mediaRecorder.stop();
+                }
+              }  
+         
+</script>
+  
+</body>
+</html>
